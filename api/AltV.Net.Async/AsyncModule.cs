@@ -96,14 +96,14 @@ namespace AltV.Net.Async
         internal readonly AsyncEventHandler<VehicleDetachAsyncDelegate> VehicleDetachAsyncEventHandler =
             new AsyncEventHandler<VehicleDetachAsyncDelegate>();
 
-        public AsyncModule(IServer server, AssemblyLoadContext assemblyLoadContext, INativeResource moduleResource,
+        public AsyncModule(IServer server, WrapperContext wrapperContext, INativeResource moduleResource,
             IBaseBaseObjectPool baseBaseObjectPool, IBaseEntityPool baseEntityPool, IEntityPool<IPlayer> playerPool,
             IEntityPool<IVehicle> vehiclePool,
             IBaseObjectPool<IBlip> blipPool,
             IBaseObjectPool<ICheckpoint> checkpointPool,
             IBaseObjectPool<IVoiceChannel> voiceChannelPool,
             IBaseObjectPool<IColShape> colShapePool,
-            INativeResourcePool nativeResourcePool) : base(server, assemblyLoadContext, moduleResource,
+            INativeResourcePool nativeResourcePool) : base(server, wrapperContext, moduleResource,
             baseBaseObjectPool,
             baseEntityPool, playerPool, vehiclePool, blipPool,
             checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool)

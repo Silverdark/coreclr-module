@@ -60,7 +60,8 @@ namespace AltV.Net.Async
             return new AsyncColShapePool(colShapeFactory);
         }
 
-        public override Module GetModule(IServer server, AssemblyLoadContext assemblyLoadContext,
+        public override Module GetModule(IServer server, 
+            WrapperContext wrapperContext,
             INativeResource cSharpNativeResource,
             IBaseBaseObjectPool baseBaseObjectPool,
             IBaseEntityPool baseEntityPool,
@@ -72,7 +73,7 @@ namespace AltV.Net.Async
             IBaseObjectPool<IColShape> colShapePool,
             INativeResourcePool nativeResourcePool)
         {
-            return new AsyncModule(server, assemblyLoadContext, cSharpNativeResource, baseBaseObjectPool,
+            return new AsyncModule(server, wrapperContext, cSharpNativeResource, baseBaseObjectPool,
                 baseEntityPool, playerPool,
                 vehiclePool, blipPool, checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool);
         }

@@ -40,7 +40,7 @@ namespace AltV.Net
         INativeResourceFactory GetNativeResourceFactory();
 
         Module GetModule(IServer server,
-            AssemblyLoadContext assemblyLoadContext,
+            WrapperContext wrapperContext,
             INativeResource cSharpNativeResource,
             IBaseBaseObjectPool baseBaseObjectPool,
             IBaseEntityPool baseEntityPool,

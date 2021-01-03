@@ -20,8 +20,9 @@ namespace AltV.Net
             NativePointer = nativePointer;
         }
         
-        internal void SetDelegates(AltNative.Resource.MainDelegate onStart)
+        internal void SetDelegates()
         {
+            AltNative.Resource.MainDelegate onStart = ModuleWrapper.OnStartResource;
             handles.AddFirst(GCHandle.Alloc(onStart));
             AltNative.Resource.CSharpResourceImpl_SetMainDelegate(NativePointer, onStart);
 

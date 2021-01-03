@@ -108,7 +108,7 @@ namespace AltV.Net
         }
 
         public virtual Module GetModule(IServer server, 
-            AssemblyLoadContext assemblyLoadContext,
+            WrapperContext wrapperContext,
             INativeResource cSharpNativeResource,
             IBaseBaseObjectPool baseBaseObjectPool,
             IBaseEntityPool baseEntityPool, IEntityPool<IPlayer> playerPool, IEntityPool<IVehicle> vehiclePool,
@@ -117,7 +117,7 @@ namespace AltV.Net
             IBaseObjectPool<IColShape> colShapePool,
             INativeResourcePool nativeResourcePool)
         {
-            return new Module(server, assemblyLoadContext, cSharpNativeResource, baseBaseObjectPool, baseEntityPool, playerPool, vehiclePool,
+            return new Module(server, wrapperContext, cSharpNativeResource, baseBaseObjectPool, baseEntityPool, playerPool, vehiclePool,
                 blipPool, checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool);
         }
     }

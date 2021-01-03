@@ -10,6 +10,8 @@ using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using AltV.Net.Host.Diagnostics.Tools;
+using System.Diagnostics;
+using System.Linq;
 
 /*using Buildalyzer;
 using Buildalyzer.Workspaces;
@@ -185,20 +187,31 @@ namespace AltV.Net.Host
 
             try
             {
-                resourceAssemblyLoadContext.LoadFromAssemblyPath(resourceDllPath);
+                var resourceAssembly = resourceAssemblyLoadContext.LoadFromAssemblyPath(resourceDllPath);
                 var newList = new HashSet<string>();
                 foreach (var referencedAssembly in resourceAssemblyLoadContext.SharedAssemblyNames)
                 {
                     var refAssembly =
                         AssemblyLoadContext.Default.LoadFromAssemblyPath(GetPath(resourcePath,
                             referencedAssembly + ".dll"));
+                    Console.WriteLine(referencedAssembly);
                     foreach (var referencedAssembly2 in refAssembly.GetReferencedAssemblies())
                     {
+                        Console.WriteLine(referencedAssembly2.Name);
                         newList.Add(referencedAssembly2.Name);
                     }
                 }
 
                 resourceAssemblyLoadContext.SharedAssemblyNames.UnionWith(newList);
+
+                // Check if dependency injection is available and call it
+                var isDepAvailable = resourceAssembly.GetReferencedAssemblies().Any(x => x.Name == "AltV.Net.DependencyInjection");
+                if (isDepAvailable)
+                {
+                    var assembly = resourceAssemblyLoadContext.LoadFromAssemblyName(new AssemblyName("AltV.Net.DependencyInjection"));
+                    InitAltVDependencyInjectionAssembly(assembly, libArgs, resourceAssemblyLoadContext, resourceName);
+                    return 0;
+                }
             }
             catch (FileLoadException e)
             {
@@ -206,16 +219,18 @@ namespace AltV.Net.Host
                 return 1;
             }
 
-            var isDefaultLoaded = false;
+            var isLoadedInDefaultContext = false;
             var isShared = resourceAssemblyLoadContext.SharedAssemblyNames.Contains("AltV.Net");
+            
+            // Check if AltV.Net.dll is already loaded in default assembly load context. 
             foreach (var assembly in AssemblyLoadContext.Default.Assemblies)
             {
                 if (assembly.GetName().Name != "AltV.Net") continue;
-                isDefaultLoaded = true;
+                isLoadedInDefaultContext = true;
                 break;
             }
 
-            if (!isDefaultLoaded && isShared)
+            if (!isLoadedInDefaultContext && isShared)
             {
                 var defaultAltVNetAssembly =
                     AssemblyLoadContext.Default.LoadFromAssemblyPath(GetPath(resourcePath, "AltV.Net.dll"));
@@ -322,6 +337,21 @@ namespace AltV.Net.Host
                             Console.WriteLine(exception);
                         }
 
+                        break;
+                }
+            }
+        }
+
+        private static void InitAltVDependencyInjectionAssembly(Assembly assembly, LibArgs libArgs, 
+            AssemblyLoadContext resourceAssemblyLoadContext, string resourceName)
+        {
+            foreach (var type in assembly.GetTypes())
+            {
+                switch (type.Name)
+                {
+                    case "ModuleWrapper":
+                        type.GetMethod("MainWithAssembly", BindingFlags.Public | BindingFlags.Static)?.Invoke(null,
+                            new object[] {libArgs.ServerPointer, libArgs.ResourcePointer, resourceAssemblyLoadContext});
                         break;
                 }
             }

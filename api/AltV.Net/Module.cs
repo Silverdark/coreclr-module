@@ -161,7 +161,7 @@ namespace AltV.Net
         private readonly IDictionary<int, IDictionary<IBaseObject, ulong>> threadRefCount =
             new Dictionary<int, IDictionary<IBaseObject, ulong>>();
 
-        public Module(IServer server, AssemblyLoadContext assemblyLoadContext,
+        public Module(IServer server, WrapperContext wrapperContext,
             INativeResource moduleResource, IBaseBaseObjectPool baseBaseObjectPool,
             IBaseEntityPool baseEntityPool, IEntityPool<IPlayer> playerPool,
             IEntityPool<IVehicle> vehiclePool,
@@ -173,7 +173,7 @@ namespace AltV.Net
         {
             Alt.Init(this);
             Server = server;
-            this.assemblyLoadContext = new WeakReference<AssemblyLoadContext>(assemblyLoadContext);
+            this.assemblyLoadContext = new WeakReference<AssemblyLoadContext>(wrapperContext.AssemblyLoadContext);
             ModuleResource = moduleResource;
             BaseBaseObjectPool = baseBaseObjectPool;
             BaseEntityPool = baseEntityPool;

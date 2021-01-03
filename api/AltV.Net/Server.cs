@@ -105,7 +105,7 @@ namespace AltV.Net
 
         public INativeResource Resource { get; }
 
-        public Server(IntPtr nativePointer, INativeResource resource, IBaseBaseObjectPool baseBaseObjectPool,
+        public Server(WrapperContext wrapperContext, INativeResource resource, IBaseBaseObjectPool baseBaseObjectPool,
             IBaseEntityPool baseEntityPool,
             IEntityPool<IPlayer> playerPool,
             IEntityPool<IVehicle> vehiclePool,
@@ -115,7 +115,7 @@ namespace AltV.Net
             IBaseObjectPool<IColShape> colShapePool,
             INativeResourcePool nativeResourcePool)
         {
-            NativePointer = nativePointer;
+            NativePointer = wrapperContext.ServerPointer;
             this.baseBaseObjectPool = baseBaseObjectPool;
             this.baseEntityPool = baseEntityPool;
             this.playerPool = playerPool;

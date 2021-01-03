@@ -9,6 +9,7 @@ using AltV.Net.ResourceLoaders;
 
 [assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
 [assembly: InternalsVisibleTo("AltV.Net.Mock")]
+[assembly: InternalsVisibleTo("AltV.Net.DependencyInjection")]
 
 namespace AltV.Net
 {
@@ -22,7 +23,7 @@ namespace AltV.Net
 
         private static IModule[] _modules;
 
-        private static void OnStartResource(IntPtr serverPointer, IntPtr resourcePointer, string resourceName,
+        public static void OnStartResource(IntPtr serverPointer, IntPtr resourcePointer, string resourceName,
             string entryPoint)
         {
             foreach (var module in _modules)
@@ -40,6 +41,13 @@ namespace AltV.Net
             {
                 return;
             }
+
+            var wrapperContext = new WrapperContext
+            {
+                ResourcePointer = resourcePointer,
+                ServerPointer = serverPointer,
+                AssemblyLoadContext = assemblyLoadContext
+            };
 
             var playerFactory = _resource.GetPlayerFactory();
             var vehicleFactory = _resource.GetVehicleFactory();
@@ -60,10 +68,10 @@ namespace AltV.Net
                 _resource.GetBaseBaseObjectPool(playerPool, vehiclePool, blipPool, checkpointPool, voiceChannelPool,
                     colShapePool);
             nativeResourcePool.GetOrCreate(serverPointer, resourcePointer, out var csharpResource);
-            var server = new Server(serverPointer, csharpResource, baseObjectPool, entityPool, playerPool, vehiclePool,
+            var server = new Server(wrapperContext, csharpResource, baseObjectPool, entityPool, playerPool, vehiclePool,
                 blipPool,
                 checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool);
-            _module = _resource.GetModule(server, assemblyLoadContext, csharpResource, baseObjectPool, entityPool,
+            _module = _resource.GetModule(server, wrapperContext, csharpResource, baseObjectPool, entityPool,
                 playerPool, vehiclePool,
                 blipPool, checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool);
 
@@ -75,7 +83,7 @@ namespace AltV.Net
             {
             }
 
-            csharpResource.CSharpResourceImpl.SetDelegates(OnStartResource);
+            csharpResource.CSharpResourceImpl.SetDelegates();
 
             _scripts = AssemblyLoader.FindAllTypes<IScript>(assemblyLoadContext.Assemblies);
             foreach (var script in _scripts)

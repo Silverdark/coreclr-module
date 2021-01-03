@@ -64,6 +64,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AltV.Net.Interactions.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AltV.Net.VehicleData", "AltV.Net.VehicleData\AltV.Net.VehicleData.csproj", "{986F9175-F6E9-4521-A871-2391000CAE9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AltV.Net.DependencyInjection", "AltV.Net.DependencyInjection\AltV.Net.DependencyInjection.csproj", "{B22B13CC-AE86-4337-B8AB-67C79EED30DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -263,5 +265,11 @@ Global
 		{986F9175-F6E9-4521-A871-2391000CAE9E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{986F9175-F6E9-4521-A871-2391000CAE9E}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
 		{986F9175-F6E9-4521-A871-2391000CAE9E}.Testing|Any CPU.Build.0 = Debug|Any CPU
+		{B22B13CC-AE86-4337-B8AB-67C79EED30DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B22B13CC-AE86-4337-B8AB-67C79EED30DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B22B13CC-AE86-4337-B8AB-67C79EED30DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B22B13CC-AE86-4337-B8AB-67C79EED30DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B22B13CC-AE86-4337-B8AB-67C79EED30DA}.Testing|Any CPU.ActiveCfg = Debug|Any CPU
+		{B22B13CC-AE86-4337-B8AB-67C79EED30DA}.Testing|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal
