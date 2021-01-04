@@ -16,7 +16,7 @@ using AltV.Net.Native;
 
 namespace AltV.Net
 {
-    public class Module : IDisposable
+    public class Module : IDisposable, IServerModule
     {
         internal readonly IServer Server;
 

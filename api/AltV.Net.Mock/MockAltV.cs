@@ -36,7 +36,13 @@ namespace AltV.Net.Mock
             var server = new MockServer(IntPtr.Zero, baseObjectPool, entityPool, playerPool, vehiclePool, blipPool,
                 checkpointPool, voiceChannelPool, null);
             var cSharpNativeResource = new NativeResource(IntPtr.Zero, IntPtr.Zero);
-            var module = resource.GetModule(server, AssemblyLoadContext.Default, cSharpNativeResource, baseObjectPool, entityPool, playerPool,
+            var wrapperContext = new WrapperContext
+            {
+                ServerPointer = IntPtr.Zero,
+                ResourcePointer = IntPtr.Zero,
+                AssemblyLoadContext = AssemblyLoadContext.Default
+            };
+            var module = resource.GetModule(server, wrapperContext, cSharpNativeResource, baseObjectPool, entityPool, playerPool,
                 vehiclePool, blipPool, checkpointPool, voiceChannelPool, colShapePool, null);
             resource.OnStart();
         }

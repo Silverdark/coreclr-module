@@ -15,7 +15,7 @@ namespace AltV.Net
 {
     internal static class ModuleWrapper
     {
-        private static Module _module;
+        private static IServerModule _module;
 
         private static IResource _resource;
 
@@ -37,7 +37,7 @@ namespace AltV.Net
         public static void MainWithAssembly(IntPtr serverPointer, IntPtr resourcePointer,
             AssemblyLoadContext assemblyLoadContext)
         {
-            if (!AssemblyLoader.FindType(assemblyLoadContext.Assemblies, out _resource))
+            if (!AssemblyLoader.FindType(assemblyLoadContext.Assemblies, out IResource resource))
             {
                 return;
             }
@@ -48,33 +48,48 @@ namespace AltV.Net
                 ServerPointer = serverPointer,
                 AssemblyLoadContext = assemblyLoadContext
             };
-
-            var playerFactory = _resource.GetPlayerFactory();
-            var vehicleFactory = _resource.GetVehicleFactory();
-            var blipFactory = _resource.GetBlipFactory();
-            var checkpointFactory = _resource.GetCheckpointFactory();
-            var voiceChannelFactory = _resource.GetVoiceChannelFactory();
-            var colShapeFactory = _resource.GetColShapeFactory();
-            var nativeResourceFactory = _resource.GetNativeResourceFactory();
-            var playerPool = _resource.GetPlayerPool(playerFactory);
-            var vehiclePool = _resource.GetVehiclePool(vehicleFactory);
-            var blipPool = _resource.GetBlipPool(blipFactory);
-            var checkpointPool = _resource.GetCheckpointPool(checkpointFactory);
-            var voiceChannelPool = _resource.GetVoiceChannelPool(voiceChannelFactory);
-            var colShapePool = _resource.GetColShapePool(colShapeFactory);
-            var nativeResourcePool = _resource.GetNativeResourcePool(nativeResourceFactory);
-            var entityPool = _resource.GetBaseEntityPool(playerPool, vehiclePool);
+            
+            var playerFactory = resource.GetPlayerFactory();
+            var vehicleFactory = resource.GetVehicleFactory();
+            var blipFactory = resource.GetBlipFactory();
+            var checkpointFactory = resource.GetCheckpointFactory();
+            var voiceChannelFactory = resource.GetVoiceChannelFactory();
+            var colShapeFactory = resource.GetColShapeFactory();
+            var nativeResourceFactory = resource.GetNativeResourceFactory();
+            var playerPool = resource.GetPlayerPool(playerFactory);
+            var vehiclePool = resource.GetVehiclePool(vehicleFactory);
+            var blipPool = resource.GetBlipPool(blipFactory);
+            var checkpointPool = resource.GetCheckpointPool(checkpointFactory);
+            var voiceChannelPool = resource.GetVoiceChannelPool(voiceChannelFactory);
+            var colShapePool = resource.GetColShapePool(colShapeFactory);
+            var nativeResourcePool = resource.GetNativeResourcePool(nativeResourceFactory);
+            var entityPool = resource.GetBaseEntityPool(playerPool, vehiclePool);
             var baseObjectPool =
-                _resource.GetBaseBaseObjectPool(playerPool, vehiclePool, blipPool, checkpointPool, voiceChannelPool,
+                resource.GetBaseBaseObjectPool(playerPool, vehiclePool, blipPool, checkpointPool, voiceChannelPool,
                     colShapePool);
             nativeResourcePool.GetOrCreate(serverPointer, resourcePointer, out var csharpResource);
             var server = new Server(wrapperContext, csharpResource, baseObjectPool, entityPool, playerPool, vehiclePool,
                 blipPool,
                 checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool);
-            _module = _resource.GetModule(server, wrapperContext, csharpResource, baseObjectPool, entityPool,
+            
+            var module = resource.GetModule(server, wrapperContext, csharpResource, baseObjectPool, entityPool,
                 playerPool, vehiclePool,
                 blipPool, checkpointPool, voiceChannelPool, colShapePool, nativeResourcePool);
+            
+            Initialize(resource, module, server, csharpResource, assemblyLoadContext);
+        }
 
+        // TODO: Refactor
+        internal static void Initialize(IResource resource,
+                                        IServerModule module,
+                                        IServer server,
+                                        INativeResource csharpResource,
+                                        AssemblyLoadContext assemblyLoadContext)
+        {
+            _resource = resource;
+            _module = module;
+            _scripts = AssemblyLoader.FindAllTypes<IScript>(assemblyLoadContext.Assemblies);
+            
             foreach (var unused in server.GetPlayers())
             {
             }
@@ -84,8 +99,7 @@ namespace AltV.Net
             }
 
             csharpResource.CSharpResourceImpl.SetDelegates();
-
-            _scripts = AssemblyLoader.FindAllTypes<IScript>(assemblyLoadContext.Assemblies);
+            
             foreach (var script in _scripts)
             {
                 if (script.GetType().GetInterfaces().Contains(typeof(IResource)))
@@ -94,7 +108,9 @@ namespace AltV.Net
                         "IScript must not be a IResource for type:" + script.GetType());
                 }
             }
+            
             _module.OnScriptsLoaded(_scripts);
+            // TODO: Provide from outside
             _modules = AssemblyLoader.FindAllTypes<IModule>(assemblyLoadContext.Assemblies);
             _module.OnModulesLoaded(_modules);
 

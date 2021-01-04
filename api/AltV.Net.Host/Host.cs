@@ -349,8 +349,8 @@ namespace AltV.Net.Host
             {
                 switch (type.Name)
                 {
-                    case "ModuleWrapper":
-                        type.GetMethod("MainWithAssembly", BindingFlags.Public | BindingFlags.Static)?.Invoke(null,
+                    case "DependencyInjectionWrapper":
+                        type.GetMethod("Main", BindingFlags.Public | BindingFlags.Static)?.Invoke(null,
                             new object[] {libArgs.ServerPointer, libArgs.ResourcePointer, resourceAssemblyLoadContext});
                         break;
                 }

@@ -5,28 +5,24 @@ using AltV.Net.Elements.Pools;
 using AltV.Net.ResourceLoaders;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Diagnostics;
 using System.Runtime.Loader;
-using System.Threading;
 
 namespace AltV.Net.DependencyInjection
 {
     // ReSharper disable once UnusedType.Global
     // TODO: Rename to match code
-    internal class ModuleWrapper
+    internal class DependencyInjectionWrapper
     {
         // ReSharper disable once UnusedMember.Global
         // This is called by `AltV.Net.Host` when dependency injection is enabled.
-        public static void MainWithAssembly(IntPtr serverPointer,
-                                            IntPtr resourcePointer,
-                                            AssemblyLoadContext assemblyLoadContext)
+        public static void Main(IntPtr serverPointer, IntPtr resourcePointer, AssemblyLoadContext assemblyLoadContext)
         {
             // Build service provider
             if (!AssemblyLoader.FindType(assemblyLoadContext.Assemblies, out IStartup startup))
             {
                 return;
             }
-            
+
             var serviceCollection = new ServiceCollection();
 
             // TODO: Move into `AltDep.UsePools` or so... But with this it's possible to have missing dependencies.
@@ -48,8 +44,9 @@ namespace AltV.Net.DependencyInjection
                 return resource;
             });
             
+            serviceCollection.AddSingleton<IResource, EmptyResource>();
             serviceCollection.AddSingleton<IServer, Server>();
-            serviceCollection.AddSingleton<Module>();
+            serviceCollection.AddSingleton<IServerModule, Module>();
             
             serviceCollection.AddSingleton<IBaseBaseObjectPool, BaseBaseObjectPool>();
             serviceCollection.AddSingleton<IEntityPool<IPlayer>, PlayerPool>();
@@ -71,22 +68,41 @@ namespace AltV.Net.DependencyInjection
             serviceCollection.AddSingleton<INativeResourcePool, NativeResourcePool>();
             serviceCollection.AddSingleton<INativeResourceFactory, NativeResourceFactory>();
 
-
             startup.ConfigureServices(serviceCollection);
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             // Continue setup
 
-            while (!Debugger.IsAttached)
-                Thread.Sleep(1000);
+            // while (!Debugger.IsAttached)
+            //     Thread.Sleep(1000);
+
+            var resource = serviceProvider.GetRequiredService<IResource>();
+            var server = serviceProvider.GetRequiredService<IServer>();
+            var module = serviceProvider.GetRequiredService<IServerModule>();
+            var nativeResource = serviceProvider.GetRequiredService<INativeResource>();
+
+            ModuleWrapper.Initialize(resource, module, server, nativeResource, assemblyLoadContext);
             
-            var module = serviceProvider.GetRequiredService<Module>();
+            // TODO: Under construction
+            var scriptServices = AssemblyLoader.FindAllTypes<IScriptService>(assemblyLoadContext.Assemblies);
+            foreach (var scriptService in scriptServices)
+            {
+                scriptService.Initialize();
+            }
+        }
+        
+        private class EmptyResource : Resource
+        {
+            public override void OnStart()
+            {
+            }
+
+            public override void OnStop()
+            {
+            }
         }
 
-        private static void OnStart(IntPtr serverpointer, IntPtr resourcepointer, string resourcename, string entrypoint)
-        {
-            Console.WriteLine("onStart");
-        }
+        
     }
 }

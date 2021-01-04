@@ -3,7 +3,7 @@ using System.Runtime.Loader;
 
 namespace AltV.Net
 {
-    // TODO: Rename
+    // TODO: Rename, maybe remove
     public class WrapperContext
     {
         public IntPtr ServerPointer { get; set; }
